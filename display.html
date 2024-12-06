@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Open Source PRs</title>
+</head>
+<body>
+    <h1>My Open Source Pull Requests</h1>
+    <ul id="pr-list"></ul>
+
+    <script>
+        async function fetchPRData() {
+            const response = await fetch('pr_data.json');
+            const data = await response.json();
+
+            const prList = document.getElementById('pr-list');
+            data.items.forEach(pr => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `<a href="${pr.html_url}">${pr.title}</a> - ${pr.repository_url}`;
+                prList.appendChild(listItem);
+            });
+        }
+
+        fetchPRData();
+    </script>
+</body>
+</html>
