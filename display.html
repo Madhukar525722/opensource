@@ -14,7 +14,7 @@
             const response = await fetch('pr_data.json');
             const data = await response.json();
 
-            const prList = document.getElementById('pr-list');
+            const prList = document.getElementById('items');
             data.items.forEach(pr => {
                 const listItem = document.createElement('li');
                 listItem.innerHTML = `<a href="${pr.html_url}">${pr.title}</a> - ${pr.repository_url}`;
