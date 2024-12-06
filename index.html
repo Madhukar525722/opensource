@@ -4,32 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Open Source PRs</title>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        .count {
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <h1>My Open Source Pull Requests</h1>
-    <ul id="pr-list"></ul>
+    <div>
+        <span class="count" id="total-count">Total PRs: 0</span> |
+        <span class="count" id="repo-counts">Repository based counts: </span>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th>Title</th>
+                <th>Repository</th>
+                <th>Status</th>
+                <th>Link</th>
+            </tr>
+        </thead>
+        <tbody id="pr-list">
+        </tbody>
+    </table>
 
     <script>
         async function fetchPRData() {
             try {
                 const response = await fetch('pr_data.json');
-                console.log('Response status:', response.status); // Debugging line
-
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
 
                 const data = await response.json();
-                console.log('Fetched data:', data); // Debugging line
+                document.getElementById('total-count').textContent = `Total PRs: ${data.total_count}`;
 
+                const repoCounts = {};
                 const prList = document.getElementById('pr-list');
-                data.items.forEach(pr => {
-                    const listItem = document.createElement('li');
-                    listItem.innerHTML = `<a href="${pr.html_url}">${pr.title}</a> - ${pr.repository_url.replace('https://api.github.com/repos/', '')}`;
+                const prItems = data.items.sort((a, b) => {
+                    const statusOrder = ['merged', 'closed', 'open'];
+                    return statusOrder.indexOf(a.state) - statusOrder.indexOf(b.state);
+                });
+
+                prItems.forEach(pr => {
+                    const repoName = pr.repository_url.replace('https://api.github.com/repos/', '');
+                    repoCounts[repoName] = (repoCounts[repoName] || 0) + 1;
+
+                    const listItem = document.createElement('tr');
+                    listItem.innerHTML = `
+                        <td>${pr.title}</td>
+                        <td>${repoName}</td>
+                        <td>${pr.state}</td>
+                        <td><a href="${pr.html_url}" target="_blank">Link</a></td>
+                    `;
                     prList.appendChild(listItem);
                 });
+
+                document.getElementById('repo-counts').textContent = `Repository based counts: ${JSON.stringify(repoCounts)}`;
             } catch (error) {
-                console.error('Error fetching PR data:', error); // Debugging line
+                console.error('Error fetching PR data:', error);
             }
         }
 
