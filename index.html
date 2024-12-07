@@ -31,29 +31,23 @@
             background-color: #4CAF50;
             display: inline-block;
         }
-        .hide-btn {
-            cursor: pointer;
-            color: red;
-            margin-left: 10px;
-        }
     </style>
 </head>
 <body>
     <h2>PRs raised</h2>
-    <div>
-        <span class="count" id="total-count">Total PRs: 0</span> |
-        <span class="count" id="repo-counts">Repository based counts: </span>
-    </div>
-    <div id="contribution-blocks" class="contribution-blocks"></div>
+    <a href="https://github.com/Madhukar525722"><img src="logo.jpg" alt="GitHub Logo" style="width:20px;height:20px;"> Madhukar525722</a>
+    <table>
+        <tr>
+            <td>Total PRs:</td>
+            <td id="total-count">0</td>
+        </tr>
+        <tr>
+            <td>Repository based counts:</td>
+            <td id="repo-counts"></td>
+        </tr>
+    </table>
 
-    <div>
-        <label for="sort-by">Sort by:</label>
-        <select id="sort-by" onchange="sortPRs()">
-            <option value="repository">Repository</option>
-            <option value="status">Status</option>
-            <option value="title">Title</option>
-        </select>
-    </div>
+    <div id="contribution-blocks" class="contribution-blocks"></div>
 
     <table>
         <thead>
@@ -62,7 +56,6 @@
                 <th>Repository</th>
                 <th>Status</th>
                 <th>Link</th>
-                <th>Hide</th>
             </tr>
         </thead>
         <tbody id="pr-list">
@@ -73,7 +66,7 @@
     <table>
         <thead>
             <tr>
-                <th>JIRA</th>
+                <th>JIRA Number</th>
                 <th>Description</th>
                 <th>Link</th>
             </tr>
@@ -94,36 +87,22 @@
                     }
 
                     const data = await response.json();
-                    document.getElementById('total-count').textContent = `Total PRs: ${data.total_count}`;
+                    document.getElementById('total-count').textContent = data.total_count;
 
-                    const repoCounts = {};
                     prItems = data.items;
-                    renderPRList(prItems);
 
-                    document.getElementById('repo-counts').textContent = `Repository based counts: ${JSON.stringify(repoCounts)}`;
-
-                    const contributionBlocks = document.getElementById('contribution-blocks');
-                    for (const repo in repoCounts) {
-                        const blockContainer = document.createElement('div');
-                        blockContainer.style.display = 'flex';
-                        blockContainer.style.flexDirection = 'column';
-                        blockContainer.style.alignItems = 'center';
-
-                        const blocks = document.createElement('div');
-                        blocks.classList.add('contribution-blocks');
-                        for (let i = 0; i < repoCounts[repo]; i++) {
-                            const block = document.createElement('div');
-                            block.classList.add('block');
-                            blocks.appendChild(block);
+                    // Sort PRs by repository and then by status
+                    prItems.sort((a, b) => {
+                        const repoA = a.repository_url.replace('https://api.github.com/repos/', '');
+                        const repoB = b.repository_url.replace('https://api.github.com/repos/', '');
+                        if (repoA !== repoB) {
+                            return repoA.localeCompare(repoB);
                         }
+                        const statusOrder = ['merged', 'closed', 'open'];
+                        return statusOrder.indexOf(a.state) - statusOrder.indexOf(b.state);
+                    });
 
-                        const label = document.createElement('span');
-                        label.textContent = repo;
-
-                        blockContainer.appendChild(label);
-                        blockContainer.appendChild(blocks);
-                        contributionBlocks.appendChild(blockContainer);
-                    }
+                    renderPRList(prItems);
                 } catch (error) {
                     console.error('Error fetching PR data:', error);
                 }
@@ -144,43 +123,41 @@
                         <td>${repoName}</td>
                         <td>${pr.state}</td>
                         <td><a href="${pr.html_url}" target="_blank">Link</a></td>
-                        <td><span class="hide-btn" onclick="hidePR(this)">Hide</span></td>
                     `;
                     prList.appendChild(listItem);
                 });
 
-                document.getElementById('repo-counts').textContent = `Repository based counts: ${JSON.stringify(repoCounts)}`;
-            }
+                document.getElementById('repo-counts').textContent = JSON.stringify(repoCounts);
 
-            function hidePR(element) {
-                const row = element.parentElement.parentElement;
-                row.style.display = 'none';
-            }
+                const contributionBlocks = document.getElementById('contribution-blocks');
+                for (const repo in repoCounts) {
+                    const blockContainer = document.createElement('div');
+                    blockContainer.style.display = 'flex';
+                    blockContainer.style.flexDirection = 'column';
+                    blockContainer.style.alignItems = 'center';
 
-            function sortPRs() {
-                const sortBy = document.getElementById('sort-by').value;
+                    const blocks = document.createElement('div');
+                    blocks.classList.add('contribution-blocks');
+                    for (let i = 0; i < repoCounts[repo]; i++) {
+                        const block = document.createElement('div');
+                        block.classList.add('block');
+                        blocks.appendChild(block);
+                    }
 
-                if (sortBy === 'repository') {
-                    prItems.sort((a, b) => {
-                        const repoA = a.repository_url.replace('https://api.github.com/repos/', '');
-                        const repoB = b.repository_url.replace('https://api.github.com/repos/', '');
-                        return repoA.localeCompare(repoB);
-                    });
-                } else if (sortBy === 'status') {
-                    const statusOrder = ['merged', 'closed', 'open'];
-                    prItems.sort((a, b) => statusOrder.indexOf(a.state) - statusOrder.indexOf(b.state));
-                } else if (sortBy === 'title') {
-                    prItems.sort((a, b) => a.title.localeCompare(b.title));
+                    const label = document.createElement('span');
+                    label.textContent = repo;
+
+                    blockContainer.appendChild(label);
+                    blockContainer.appendChild(blocks);
+                    contributionBlocks.appendChild(blockContainer);
                 }
-
-                renderPRList(prItems);
             }
 
             async function fetchBugData() {
                 const bugs = [
-                    { jira: 'SPARK-44670', description: 'Fix the `test_to_excel` tests for python3.7', link: 'https://issues.apache.org/jira/browse/SPARK-44670' },
                     { jira: 'SPARK-49827', description: 'Adding batches with retry mechanism for fetching all partitions from metastore', link: 'https://issues.apache.org/jira/browse/SPARK-49827' },
                     { jira: 'SPARK-50461', description: 'Add support for location for managed tables on database', link: 'https://issues.apache.org/jira/browse/SPARK-50461' },
+                    { jira: 'SPARK-44670', description: 'Fix the `test_to_excel` tests for python3.7', link: 'https://issues.apache.org/jira/browse/SPARK-44670' },
                     { jira: 'KYUUBI-6720', description: '[Improvement] K8s pod OOM Killed should be identified as Application failed state', link: 'https://github.com/apache/kyuubi/issues/6720' },
                     { jira: 'KYUUBI-6784', description: '[Improvement] Launching k8s engine pods with respective users', link: 'https://github.com/apache/kyuubi/issues/6784' }
                 ];
