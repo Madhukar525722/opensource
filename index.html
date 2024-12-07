@@ -39,7 +39,7 @@
     </style>
 </head>
 <body>
-    <h1>PRs Raised</h1>
+    <h2>PRs raised</h2>
     <div>
         <span class="count" id="total-count">Total PRs: 0</span> |
         <span class="count" id="repo-counts">Repository based counts: </span>
@@ -73,7 +73,7 @@
     <table>
         <thead>
             <tr>
-                <th>JIRA Number</th>
+                <th>JIRA</th>
                 <th>Description</th>
                 <th>Link</th>
             </tr>
@@ -186,6 +186,11 @@
                 ];
 
                 const bugList = document.getElementById('bug-list');
+                if (!bugList) {
+                    console.error('Element with ID "bug-list" not found.');
+                    return;
+                }
+
                 bugs.forEach(bug => {
                     const listItem = document.createElement('tr');
                     listItem.innerHTML = `
