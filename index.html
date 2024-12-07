@@ -13,6 +13,7 @@
         th, td {
             border: 1px solid #ddd;
             padding: 8px;
+            text-align: center;
         }
         th {
             background-color: #f2f2f2;
@@ -20,34 +21,23 @@
         .count {
             font-weight: bold;
         }
-        .contribution-blocks {
-            display: flex;
-            gap: 5px;
-            margin-top: 10px;
-        }
-        .block {
-            width: 20px;
-            height: 20px;
-            background-color: #4CAF50;
-            display: inline-block;
-        }
     </style>
 </head>
 <body>
     <h2>PRs raised</h2>
-    <a href="https://github.com/Madhukar525722"><img src="logo.jpg" alt="GitHub Logo" style="width:20px;height:20px;"> Madhukar525722</a>
+    <a href="https://github.com/Madhukar525722"><img src="logo.jpeg" alt="GitHub Logo" style="width:20px;height:20px;"> Madhukar525722</a>
     <table>
-        <tr>
-            <td>Total PRs:</td>
-            <td id="total-count">0</td>
-        </tr>
-        <tr>
-            <td>Repository based counts:</td>
-            <td id="repo-counts"></td>
-        </tr>
+        <thead>
+            <tr id="header-row">
+                <th>Total PRs</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr id="count-row">
+                <td id="total-count">0</td>
+            </tr>
+        </tbody>
     </table>
-
-    <div id="contribution-blocks" class="contribution-blocks"></div>
 
     <table>
         <thead>
@@ -127,29 +117,17 @@
                     prList.appendChild(listItem);
                 });
 
-                document.getElementById('repo-counts').textContent = JSON.stringify(repoCounts);
-
-                const contributionBlocks = document.getElementById('contribution-blocks');
+                // Update the header row and count row for repository counts
+                const headerRow = document.getElementById('header-row');
+                const countRow = document.getElementById('count-row');
                 for (const repo in repoCounts) {
-                    const blockContainer = document.createElement('div');
-                    blockContainer.style.display = 'flex';
-                    blockContainer.style.flexDirection = 'column';
-                    blockContainer.style.alignItems = 'center';
+                    const th = document.createElement('th');
+                    th.textContent = repo;
+                    headerRow.appendChild(th);
 
-                    const blocks = document.createElement('div');
-                    blocks.classList.add('contribution-blocks');
-                    for (let i = 0; i < repoCounts[repo]; i++) {
-                        const block = document.createElement('div');
-                        block.classList.add('block');
-                        blocks.appendChild(block);
-                    }
-
-                    const label = document.createElement('span');
-                    label.textContent = repo;
-
-                    blockContainer.appendChild(label);
-                    blockContainer.appendChild(blocks);
-                    contributionBlocks.appendChild(blockContainer);
+                    const td = document.createElement('td');
+                    td.textContent = repoCounts[repo];
+                    countRow.appendChild(td);
                 }
             }
 
